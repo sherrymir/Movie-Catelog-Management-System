@@ -1,4 +1,4 @@
-Hi there 👋
+Hello everyone, My name is Najam👋
 
 - 🔭 I’m currently working on Data Analysis
 - 🌱 I’m currently learning  Generative AI
