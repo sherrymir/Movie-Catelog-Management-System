@@ -8,6 +8,3 @@ Hello everyone, My name is Najam👋
 
 
  
-clear
-git status
-najam
