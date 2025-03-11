@@ -2,7 +2,7 @@
 
 1. 📜 View All Movies:
 2. ➕ Add Movies:
-❌ Remove Movies:
+3. ❌ Remove Movies:
 4. 🔍 Search Movies:
 5. 💾 Persistent Storage:
 
