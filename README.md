@@ -8,3 +8,4 @@
 
 Your movies are saved locally (JSON-based magic 🪄), so the catalog stays intact, even if you exit.
 
++++++ dont know how to represent data (where to learn creativity)
