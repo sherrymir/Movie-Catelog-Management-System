@@ -18,6 +18,12 @@ movies_list = load_from_file()
 
 #Search Function for searching
 def check_movies_data(movies_list,n):
+    if n == "movie":
+        name = input("Search for Movie: ")
+        for i in movies_list:
+            if name in i :
+                print(i) 
+
     try:
         Movies = [movie[n].title() for movie in movies_list]
 
@@ -118,7 +124,7 @@ while True:
             
             case 4:
                 print()
-                search = input("What are you looking for(Director,date, Movie) : ").strip()
+                search = input("What are you looking for(Director,date, Movie) : ").strip().lower()
                 print()
                 data(search)
             
