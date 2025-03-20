@@ -11,26 +11,31 @@ def load_from_file():
     try:
         with open("movies_data.json","r") as file:
             return json.load(file)
-    except:
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        print(f"error loading data: {e}")
         return []
         
 movies_list = load_from_file()
 
 #Search Function for searching
 def check_movies_data(movies_list,n):
-    if n == "movie":
-        name = input("Search for Movie: ")
-        for i in movies_list:
-            if name in i :
-                print(i) 
+    if n.lower() == "movie":
+        name = input("Search for Movie: ").strip().lower()
+        found = [movie for movie in movies_list if name.lower() in movie.get("Movie","").lower()]
+        if found:
+            for movie in found:
+                print(f"{movie['Movie']}")
+        else:
+            print("NO movie found!")
+        return
 
     try:
-        Movies = [movie[n].title() for movie in movies_list]
+        Movies = [movie.get(n.capitalize(),"unknown").title() for movie in movies_list]
 
         for i,name in enumerate(Movies,start = 1):
             result = f"{i}. {name} "
             print(result)
-            
+  
     except KeyError:
         print(f"{n} cannot be found in the data")
 
@@ -54,7 +59,7 @@ def add_movie():
 
             print()
             director = input("Enter the name of the director: ").capitalize()
-            movie = input("Enter the name of the movie").title()
+            movie = input("Enter the name of the movie: ").title()
             date = int(input("Enter the release year of the movie: "))
             print()
             
@@ -64,6 +69,7 @@ def add_movie():
 
         except ValueError:
             print("Invalid value")
+            continue
 
         new_movie = {
             "Director" : director,
@@ -79,7 +85,7 @@ def add_movie():
 #Function to remove the movie from the list
 def remove_movie():
     print()
-    movies = [movies["Movie"] for movies in movies_list] 
+    movies = [movies.get("Movie","Unknown") for movies in movies_list] 
     for i,name in enumerate(movies, start = 1):
         print(f"{i}. {name}")
     try:
@@ -89,7 +95,7 @@ def remove_movie():
         if 0<=remove<len(movies_list):
             removed_movie = movies_list.pop(remove)
             save_to_file()
-            print(f"{removed_movie['Movie']} has been removed from the list")
+            print(f"=>{removed_movie['Movie']} has been removed from the list")
         else:
             print("Movie not found")
     except ValueError:
@@ -141,3 +147,4 @@ while True:
                 print("Please enter the valid choice")
     except ValueError:
         print("Invalid Value entered")
+
