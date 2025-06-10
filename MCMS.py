@@ -3,148 +3,140 @@ import sys
 import time
 import json
 
-def save_to_file():
-    with open("movies_data.json","w") as file:
-        json.dump(movies_list,file,indent = 4)
+class MovieCatalog:
+    def __init__(self, filename="movies_data.json"):
+        self.filename = filename
+        self.movies_list = self.load_from_file()
 
-def load_from_file():
-    try:
-        with open("movies_data.json","r") as file:
-            return json.load(file)
-    except (FileNotFoundError, json.JSONDecodeError) as e:
-        print(f"error loading data: {e}")
-        return []
-        
-movies_list = load_from_file()
+    def save_to_file(self):
+        with open(self.filename, "w") as file:
+            json.dump(self.movies_list, file, indent=4)
 
-#Search Function for searching
-def check_movies_data(movies_list,n):
-    if n.lower() == "movie":
-        name = input("Search for Movie: ").strip().lower()
-        found = [movie for movie in movies_list if name.lower() in movie.get("Movie","").lower()]
-        if found:
-            for movie in found:
-                print(f"{movie['Movie']}")
-        else:
-            print("NO movie found!")
-        return
-
-    try:
-        Movies = [movie.get(n.capitalize(),"unknown").title() for movie in movies_list]
-
-        for i,name in enumerate(Movies,start = 1):
-            result = f"{i}. {name} "
-            print(result)
-  
-    except KeyError:
-        print(f"{n} cannot be found in the data")
-
-#Search....
-def data(info):
-    check_movies_data(movies_list,info)
-
-
-#Function to display a list of the movie
-def movies():
-    Movies = [movie["Movie"] for movie in movies_list]
-    print()
-    print("Movies List=> ")
-    for i,movies in enumerate(Movies):
-        print(f"{i+1}. {movies} ")
-
-#Function to add the movie to the list
-def add_movie():
-    while True:
+    def load_from_file(self):
         try:
+            with open(self.filename, "r") as file:
+                return json.load(file)
+        except FileNotFoundError:
+            return []
 
-            print()
-            director = input("Enter the name of the director: ").capitalize()
-            movie = input("Enter the name of the movie: ").title()
-            date = int(input("Enter the release year of the movie: "))
-            print()
+    def display_movies(self):
+        if not self.movies_list:
+            print("\nNo movies available.")
+            return
             
-            if date>2025 or date<1900:
-                print("Invalid date entered")
+        print("\nMovies List=> ")
+        for i, movie in enumerate(self.movies_list, start=1):
+            print(f"{i}. {movie['Movie']}")
+
+    def add_movie(self):
+        while True:
+            try:
+                print()
+                director = input("Enter the name of the director: ").capitalize()
+                movie = input("Enter the name of the movie: ").title()
+                date = int(input("Enter the release year of the movie: "))
+                print()
+
+                if date > 2025 or date < 1900:
+                    print("Invalid date entered. Please enter a year between 1900 and 2025.")
+                    continue
+            except ValueError:
+                print("Invalid value. Please enter numeric year.")
                 continue
 
+            new_movie = {
+                "Director": director,
+                "Movie": movie,
+                "date": date
+            }
+
+            self.movies_list.append(new_movie)
+            self.save_to_file()
+            print(f"The Movie '{new_movie['Movie']}' has been successfully added to the list.")
+            break
+
+    def remove_movie(self):
+        if not self.movies_list:
+            print("\nNo movies to remove.")
+            return
+
+        print()
+        for i, movie in enumerate(self.movies_list, start=1):
+            print(f"{i}. {movie['Movie']}")
+
+        try:
+            print()
+            remove_index = int(input("Enter the number of the movie you want to remove: ")) - 1
+            print()
+            if 0 <= remove_index < len(self.movies_list):
+                removed_movie = self.movies_list.pop(remove_index)
+                self.save_to_file()
+                print(f"'{removed_movie['Movie']}' has been removed from the list.")
+            else:
+                print("Movie not found.")
         except ValueError:
-            print("Invalid value")
-            continue
+            print("Please enter a numeric value.")
 
-        new_movie = {
-            "Director" : director,
-            "Movie" : movie,
-            "date" : date
-        }
-
-        movies_list.append(new_movie)
-        save_to_file()
-        print(f"The Movie {new_movie['Movie']} has been succefully added to the list")
-        break
-
-#Function to remove the movie from the list
-def remove_movie():
-    print()
-    movies = [movies.get("Movie","Unknown") for movies in movies_list] 
-    for i,name in enumerate(movies, start = 1):
-        print(f"{i}. {name}")
-    try:
+    def search_movies(self, search_key):
         print()
-        remove = int(input("Enter the number of the movie you want to remove: ")) - 1
-        print()
-        if 0<=remove<len(movies_list):
-            removed_movie = movies_list.pop(remove)
-            save_to_file()
-            print(f"=>{removed_movie['Movie']} has been removed from the list")
+        search_key = search_key.capitalize()
+        results = []
+        for movie in self.movies_list:
+            for key, value in movie.items():
+                if key.lower() == search_key.lower() or str(value).lower() == search_key.lower():
+                    results.append(movie)
+                    break
+
+        if results:
+            print(f"Search results for '{search_key}':")
+            for i, movie in enumerate(results, start=1):
+                print(f"{i}. Director: {movie['Director']}, Movie: {movie['Movie']}, Year: {movie['date']}")
         else:
-            print("Movie not found")
-    except ValueError:
-        print("Please enter a numeric value")
+            print(f"No results found for '{search_key}'.")
 
-        
-while True:
-    print()
-    print("Movie Catalog Mangement Tool".center(40,"+"))
-    print()
-    print("1- Movies list")
-    print("2- Add Movies")
-    print("3- Remove Movies")
-    print("4- Search Movie")
-    print("5- Exit")
-    print()
-    try:
-        
-        choice = int(input("please enter your choice: "))
+
+def main():
+    catalog = MovieCatalog()
+
+    while True:
         print()
-        print("+"*40)
-        match(choice):
-                        
-            case 1:
-                movies()
+        print("Movie Catalog Management Tool".center(40, "+"))
+        print()
+        print("1- Movies list")
+        print("2- Add Movies")
+        print("3- Remove Movies")
+        print("4- Search Movie")
+        print("5- Exit")
+        print()
 
-            case 2:
-                add_movie()
-        
-            case 3:
-                remove_movie()
-            
-            case 4:
-                print()
-                search = input("What are you looking for(Director,date, Movie) : ").strip().lower()
-                print()
-                data(search)
-            
-            case 5:
-                choice = input("Are you sure you want to exit: (Yes/No) ").capitalize()
-                if choice == "Yes":
+        try:
+            choice = int(input("Please enter your choice: "))
+            print()
+            print("+" * 40)
+
+            if choice == 1:
+                catalog.display_movies()
+            elif choice == 2:
+                catalog.add_movie()
+            elif choice == 3:
+                catalog.remove_movie()
+            elif choice == 4:
+                search = input("What are you looking for (Director, date, Movie): ").strip()
+                catalog.search_movies(search)
+            elif choice == 5:
+                confirm = input("Are you sure you want to exit? (Yes/No): ").capitalize()
+                if confirm == "Yes":
                     print("Exiting...")
-                    time.sleep(3)
+                    time.sleep(2)
                     sys.exit()
-                else: 
-                    print("Returning back to the menu..")
-                    time.sleep(3)
-            case _ :
-                print("Please enter the valid choice")
-    except ValueError:
-        print("Invalid Value entered")
+                else:
+                    print("Returning back to the menu...")
+                    time.sleep(2)
+            else:
+                print("Please enter a valid choice.")
+        except ValueError:
+            print("Invalid value entered.")
 
+
+if __name__ == "__main__":
+    main()
